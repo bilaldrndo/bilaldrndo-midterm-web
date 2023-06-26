@@ -130,17 +130,19 @@ class BaseDao
   public function investors($share_class_id)
   {
     $stmt = $this->conn->prepare("SELECT 
-                                            sc.description, 
-                                            sc.equity_main_currency, 
-                                            sc.price, i.first_name, 
-                                            i.first_name,
-                                            i.last_name,
-                                            i.company,
-                                            ct.diluted_shares
-                                        FROM cap_table AS ct
-                                        JOIN investors AS i ON ct.investor_id=i.id
-                                        JOIN share_classes AS sc ON ct.share_class_id=sc.id
-                                        WHERE sc.id = :id");
+                                    sc.description, 
+                                    sc.equity_main_currency, 
+                                    sc.price,
+                                    i.email, 
+                                    i.first_name,
+                                    i.last_name,
+                                    i.company,
+                                    SUM(ct.diluted_shares) as total_diluted_shares
+                                  FROM cap_table AS ct
+                                  JOIN investors AS i ON ct.investor_id=i.id
+                                  JOIN share_classes AS sc ON ct.share_class_id=sc.id
+                                  WHERE sc.id = :id
+                                  GROUP BY i.id;");
 
     $stmt->bindParam(':id', $share_class_id);
     $stmt->execute();
